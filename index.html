@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>moontrics // mission control</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:#000}
+    #mt{min-height:100vh;background:#000;font-family:'Courier New',monospace;color:#00ff41;position:relative;overflow:hidden}
+    canvas#mx{position:fixed;top:0;left:0;width:100%;height:100%;opacity:.07;pointer-events:none;z-index:0}
+    .sl{position:fixed;top:0;left:0;width:100%;height:2px;background:linear-gradient(transparent,#00ff4133,transparent);animation:sc 3s linear infinite;pointer-events:none;z-index:2}
+    @keyframes sc{0%{top:0}100%{top:100%}}
+    @keyframes blink{50%{opacity:0}}
+    .scr{position:relative;z-index:1;padding:2rem;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .logo{font-size:3.5rem;font-weight:700;letter-spacing:.15em;color:#00ff41;margin-bottom:.25rem}
+    .tag{font-size:.75rem;color:#00ff4188;letter-spacing:.3em;margin-bottom:2.5rem}
+    .wt{font-size:1.2rem;color:#00ff41;margin-bottom:.5rem;text-align:center}
+    .bl{animation:blink 1s step-end infinite}
+    .br{display:flex;gap:1.5rem;margin-top:2rem;flex-wrap:wrap;justify-content:center}
+    .btn{background:transparent;border:1px solid #00ff41;color:#00ff41;font-family:'Courier New',monospace;font-size:1rem;padding:.7rem 2.5rem;cursor:pointer;letter-spacing:.15em;transition:all .15s}
+    .btn:hover{background:#00ff4122}
+    .btn.d{border-color:#ff0041;color:#ff0041}
+    .btn.d:hover{background:#ff004122}
+    .nt{font-size:3rem;color:#ff0041;letter-spacing:.3em;text-align:center;margin-bottom:1rem}
+    .ns{font-size:.85rem;color:#ff004188;text-align:center}
+    .pi{background:transparent;border:none;border-bottom:1px solid #00ff41;color:#00ff41;font-family:'Courier New',monospace;font-size:1.3rem;padding:.5rem .8rem;outline:none;width:280px;letter-spacing:.2em;text-align:center}
+    .pi::placeholder{color:#00ff4144}
+    .pl{font-size:.75rem;color:#00ff4188;margin-bottom:1rem;letter-spacing:.2em}
+    .pe{font-size:.75rem;color:#ff0041;margin-top:.75rem;letter-spacing:.1em}
+    .dash{width:100%;max-width:900px;padding-bottom:2rem}
+    .dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid #00ff4133;flex-wrap:wrap;gap:.5rem}
+    .dl{font-size:1.5rem;color:#00ff41;letter-spacing:.2em}
+    .g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem;margin-bottom:.75rem}
+    .g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin-bottom:.75rem}
+    .g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:.75rem}
+    .cd{border:1px solid #00ff4133;padding:.85rem;position:relative;overflow:hidden}
+    .cd::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:#00ff4155}
+    .cl{font-size:.6rem;color:#00ff4166;letter-spacing:.2em;margin-bottom:.3rem}
+    .cv{font-size:1.5rem;color:#00ff41}
+    .cv.pos{color:#00ff41}
+    .cv.neg{color:#ff0041}
+    .cv.warn{color:#ffaa00}
+    .cv.sm{font-size:1rem}
+    .cs{font-size:.6rem;color:#00ff4155;margin-top:.2rem}
+    .pl2{display:inline-block;font-size:.55rem;padding:.1rem .4rem;border:1px solid;letter-spacing:.1em;margin-top:.25rem}
+    .pl2.g{border-color:#00ff4166;color:#00ff41}
+    .pl2.r{border-color:#ff004166;color:#ff0041}
+    .pl2.a{border-color:#ffaa0066;color:#ffaa00}
+    .sl2{font-size:.6rem;color:#00ff4166;letter-spacing:.25em;margin:1rem 0 .6rem;padding-bottom:.35rem;border-bottom:1px solid #00ff4122}
+    .tk{font-size:.7rem;color:#00ff4188;margin-top:1rem;padding-top:.6rem;border-top:1px solid #00ff4122;letter-spacing:.1em;overflow:hidden;white-space:nowrap}
+    .rb{background:transparent;border:1px solid #00ff4144;color:#00ff4188;font-family:'Courier New',monospace;font-size:.6rem;padding:.2rem .6rem;cursor:pointer;letter-spacing:.1em}
+    .rb:hover{border-color:#00ff41;color:#00ff41}
+    .lb{background:transparent;border:none;color:#ff004166;font-family:'Courier New',monospace;font-size:.6rem;cursor:pointer;letter-spacing:.1em}
+    .lb:hover{color:#ff0041}
+    .ld{font-size:.8rem;color:#00ff4188;letter-spacing:.15em;margin-top:.5rem;text-align:center}
+    .er{font-size:.75rem;color:#ff0041;margin-top:.5rem;letter-spacing:.1em;text-align:center}
+    .bw{margin-top:.4rem;height:3px;background:#00ff4111}
+    .bf{height:100%;background:#00ff41;transition:width 1.5s}
+  </style>
+</head>
+<body>
+<div id="mt">
+  <canvas id="mx"></canvas>
+  <div class="sl"></div>
+
+  <div id="sw" class="scr">
+    <div class="logo">moontrics</div>
+    <div class="tag">// mission control //</div>
+    <div class="wt">welcome, astronaut</div>
+    <div class="wt">are you ready for takeoff?<span class="bl">_</span></div>
+    <div class="br">
+      <button class="btn" onclick="showPw()">[ yes ]</button>
+      <button class="btn d" onclick="showNoob()">[ no ]</button>
+    </div>
+  </div>
+
+  <div id="sn" class="scr" style="display:none">
+    <div class="nt">noob</div>
+    <div class="ns">// clearance denied. return to earth. //</div>
+    <div class="br"><button class="btn" onclick="showW()">[ try again ]</button></div>
+  </div>
+
+  <div id="sp" class="scr" style="display:none">
+    <div class="logo" style="font-size:2rem;margin-bottom:.25rem">moontrics</div>
+    <div class="tag" style="margin-bottom:2rem">// identity verification //</div>
+    <div class="pl">enter access code</div>
+    <input class="pi" type="password" id="pf" placeholder="••••••••" onkeydown="if(event.key==='Enter')chkPw()"/>
+    <div id="pe" class="pe" style="visibility:hidden">// invalid code. nice try. //</div>
+    <div class="br" style="margin-top:1.5rem"><button class="btn" onclick="chkPw()">[ press for boobs ]</button></div>
+  </div>
+
+  <div id="sd" class="scr" style="display:none;align-items:flex-start;padding:1.5rem;justify-content:flex-start;padding-top:2rem">
+    <div class="dash">
+      <div class="dh">
+        <span class="dl">moontrics</span>
+        <span style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+          <span id="last-up" style="font-size:.55rem;color:#00ff4155;letter-spacing:.1em"></span>
+          <button class="rb" onclick="loadData()">[ refresh ]</button>
+          <button class="lb" onclick="showW()">eject</button>
+        </span>
+      </div>
+      <div id="loading" style="text-align:center;padding:3rem 0">
+        <div class="ld">// establishing uplink<span class="bl">...</span> //</div>
+      </div>
+      <div id="dash-content" style="display:none">
+        <div class="g4">
+          <div class="cd"><div class="cl">equity</div><div class="cv" id="d-eq">--</div><div class="cs">total account</div></div>
+          <div class="cd"><div class="cl">free margin</div><div class="cv" id="d-fm">--</div><div class="cs" id="d-mu">--</div></div>
+          <div class="cd"><div class="cl">all-time pnl</div><div class="cv" id="d-atp">--</div><div class="cs" id="d-atf">-- fills</div></div>
+          <div class="cd"><div class="cl">realised pnl</div><div class="cv" id="d-rp">--</div><div class="cs">closed positions</div></div>
+        </div>
+
+        <div class="sl2">// artemis // grid bot //</div>
+        <div class="g2">
+          <div class="cd">
+            <div class="cl">position</div>
+            <div class="cv sm pos" id="d-pos">--</div>
+            <div class="cs" id="d-pos2">--</div>
+            <div style="margin-top:.4rem" id="d-pills"></div>
+          </div>
+          <div class="cd">
+            <div class="cl">unrealised pnl</div>
+            <div class="cv" id="d-upnl">--</div>
+            <div class="cs" id="d-upnl2">--</div>
+            <div class="bw" style="margin-top:.6rem"><div class="bf" id="d-bar" style="width:0%"></div></div>
+            <div class="cs" style="margin-top:.25rem" id="d-bar-label">--</div>
+          </div>
+        </div>
+        <div class="g3">
+          <div class="cd"><div class="cl">open orders</div><div class="cv" id="d-oo">--</div><div class="cs" id="d-oo2">--</div></div>
+          <div class="cd"><div class="cl">capital cap</div><div class="cv">$200</div><div class="cs">of total equity</div></div>
+          <div class="cd"><div class="cl">leverage</div><div class="cv warn">20x</div><div class="cs">cross margin</div></div>
+        </div>
+
+        <div class="sl2">// system //</div>
+        <div class="g3">
+          <div class="cd"><div class="cl">artemis</div><div class="cv sm pos">nominal</div><span class="pl2 g">live</span></div>
+          <div class="cd"><div class="cl">mercury</div><div class="cv sm warn">standby</div><span class="pl2 a">building</span></div>
+          <div class="cd"><div class="cl">hermes</div><div class="cv sm" style="color:#00ff4155">t-minus</div><span class="pl2 r">architected</span></div>
+        </div>
+
+        <div class="tk" id="tk">// moontrics mission control //</div>
+      </div>
+      <div id="dash-error" style="display:none;text-align:center;padding:2rem 0">
+        <div class="er">// uplink failed. hyperliquid api unreachable. //</div>
+        <div class="br" style="margin-top:1rem;justify-content:center"><button class="btn" onclick="loadData()">[ retry ]</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WALLET='0xaD54e5024834b2826a3Dc334ade0A11b5997eC7B';
+const HL_API='https://api.hyperliquid-testnet.xyz/info';
+const PW='Tradebumz123';
+
+function hideAll(){['sw','sn','sp','sd'].forEach(id=>document.getElementById(id).style.display='none')}
+function showW(){hideAll();document.getElementById('sw').style.display='flex'}
+function showNoob(){hideAll();document.getElementById('sn').style.display='flex'}
+function showPw(){hideAll();document.getElementById('sp').style.display='flex';setTimeout(()=>document.getElementById('pf').focus(),100)}
+function chkPw(){
+  const v=document.getElementById('pf').value;
+  const e=document.getElementById('pe');
+  if(v.toLowerCase()===PW){
+    document.getElementById('pf').value='';
+    e.style.visibility='hidden';
+    hideAll();
+    document.getElementById('sd').style.display='flex';
+    loadData();
+  } else {
+    e.style.visibility='visible';
+    document.getElementById('pf').value='';
+  }
+}
+
+function fmt(n,prefix='$'){
+  const abs=Math.abs(n);
+  const s=abs>=1000?(abs/1000).toFixed(2)+'k':abs.toFixed(2);
+  return (n<0?'-':'')+prefix+s;
+}
+function fmtPnl(n){return(n>=0?'+':'')+fmt(n)}
+
+async function hl(type,extra={}){
+  const r=await fetch(HL_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,...extra})});
+  return r.json();
+}
+
+async function loadData(){
+  const loading=document.getElementById('loading');
+  const content=document.getElementById('dash-content');
+  const errDiv=document.getElementById('dash-error');
+  loading.style.display='block';
+  content.style.display='none';
+  errDiv.style.display='none';
+  try{
+    const [state,fills,openOrders]=await Promise.all([
+      hl('clearinghouseState',{user:WALLET}),
+      hl('userFills',{user:WALLET}),
+      hl('openOrders',{user:WALLET})
+    ]);
+    const acct=state.marginSummary;
+    const equity=parseFloat(acct.accountValue);
+    const freeMargin=parseFloat(acct.withdrawable||acct.freeMargin||0);
+    const marginUsed=equity-freeMargin;
+    let position=null;
+    if(state.assetPositions&&state.assetPositions.length>0){
+      const p=state.assetPositions[0].position;
+      position={coin:p.coin,size:parseFloat(p.szi),entry:parseFloat(p.entryPx||0),upnl:parseFloat(p.unrealizedPnl||0),liq:parseFloat(p.liquidationPx||0)};
+    }
+    let allTimePnl=0,realisedPnl=0,tradeCount=0;
+    if(Array.isArray(fills)){
+      fills.forEach(f=>{
+        const pnl=parseFloat(f.closedPnl||0);
+        allTimePnl+=pnl;
+        if(pnl!==0)realisedPnl+=pnl;
+        if(parseFloat(f.sz||0)>0)tradeCount++;
+      });
+    }
+    const buys=openOrders.filter(o=>o.side==='B').length;
+    const sells=openOrders.filter(o=>o.side==='A').length;
+    set('d-eq',fmt(equity));
+    set('d-fm',fmt(freeMargin));
+    set('d-mu','margin used: '+fmt(marginUsed));
+    const atpEl=document.getElementById('d-atp');
+    atpEl.textContent=fmtPnl(allTimePnl);
+    atpEl.className='cv '+(allTimePnl>=0?'pos':'neg');
+    set('d-atf',tradeCount+' fills');
+    const rpEl=document.getElementById('d-rp');
+    rpEl.textContent=fmtPnl(realisedPnl);
+    rpEl.className='cv '+(realisedPnl>=0?'pos':'neg');
+    if(position&&Math.abs(position.size)>0.0001){
+      const side=position.size>0?'long':'short';
+      set('d-pos',side+' '+Math.abs(position.size).toFixed(5)+' '+position.coin);
+      set('d-pos2','entry $'+position.entry.toLocaleString()+' // liq $'+(position.liq>0?position.liq.toFixed(0):'n/a'));
+      const upnlEl=document.getElementById('d-upnl');
+      upnlEl.textContent=fmtPnl(position.upnl);
+      upnlEl.className='cv '+(position.upnl>=0?'pos':'neg');
+      const pct=equity>0?(Math.abs(position.upnl)/equity*100).toFixed(2):0;
+      set('d-upnl2',pct+'% of equity');
+      const barPct=Math.min(Math.abs(position.upnl)/equity*100*5,100).toFixed(0);
+      document.getElementById('d-bar').style.width=barPct+'%';
+      document.getElementById('d-bar').style.background=position.upnl>=0?'#00ff41':'#ff0041';
+      set('d-bar-label','recentre guard armed');
+      document.getElementById('d-pills').innerHTML='<span class="pl2 '+(position.size>0?'g':'r')+'">'+side+'</span> <span class="pl2 a">testnet</span>';
+    } else {
+      set('d-pos','flat');
+      set('d-pos2','no open position');
+      set('d-upnl','$0.00');
+      set('d-upnl2','no exposure');
+      document.getElementById('d-pills').innerHTML='<span class="pl2 a">testnet</span>';
+    }
+    set('d-oo',openOrders.length);
+    set('d-oo2',buys+' buys // '+sells+' sells');
+    const now=new Date();
+    document.getElementById('last-up').textContent='uplink: '+now.toUTCString().slice(17,25)+' utc';
+    animateTicker(equity,allTimePnl,tradeCount,openOrders.length);
+    loading.style.display='none';
+    content.style.display='block';
+  } catch(err){
+    loading.style.display='none';
+    errDiv.style.display='block';
+  }
+}
+
+function set(id,val){const el=document.getElementById(id);if(el)el.textContent=val}
+
+function animateTicker(eq,pnl,trades,orders){
+  const msg='equity: '+fmt(eq)+' // all-time pnl: '+fmtPnl(pnl)+' // fills: '+trades+' // open orders: '+orders+' // artemis nominal // mercury t-minus // hermes architected // to the moon ';
+  const el=document.getElementById('tk');
+  let pos=0;
+  const full=msg.repeat(3);
+  function tick(){el.textContent=full.substring(pos,pos+120);pos=(pos+1)%(msg.length);setTimeout(tick,75)}
+  tick();
+}
+
+const canvas=document.getElementById('mx');
+const ctx=canvas.getContext('2d');
+function rsz(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+rsz();
+window.addEventListener('resize',rsz);
+const cols=Math.floor(canvas.width/14);
+const drops=Array(cols).fill(1);
+function drawMx(){
+  ctx.fillStyle='rgba(0,0,0,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#00ff41';ctx.font='12px monospace';
+  drops.forEach((y,i)=>{
+    const ch=String.fromCharCode(0x30A0+Math.random()*96);
+    ctx.fillText(ch,i*14,y*14);
+    if(y*14>canvas.height&&Math.random()>.975)drops[i]=0;
+    drops[i]++;
+  });
+}
+setInterval(drawMx,50);
+</script>
+</body>
+</html>
